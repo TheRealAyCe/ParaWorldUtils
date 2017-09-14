@@ -1,0 +1,7 @@
+This tool allows you to create a mod-folder for own modding projects.
+You will be asked for the name of the mod, after that you will be
+able to work with it in [Paraworld folder]/Data/[modname]/
+
+REQUIRES VERSION 1.05 !
+
+By AyCe

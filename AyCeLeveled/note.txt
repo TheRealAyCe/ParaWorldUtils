@@ -1,0 +1,22 @@
+This replaces some files in the leveled folder.
+
+The editor should still work with the normal game afterwards.
+
+Features:
+ - Support for CEP Conditions & Actions
+   - GREG - Group in region, also support for this in ActionObjSelector
+   - RMGR - Remove from Group
+   - OBHP - Set Object HP
+   - CHAT - Chat Input condition
+ - ACDO: Added "Use" (Farm), "Mine" (Stone), "Harvest" (Wood) and "GetFood" (Fruit Bush)
+ - Auto-Flatten-And-Underground Feature
+ - More text in levelinfo possible
+ - Workarounded Seq-Editor crash with TabFile.usl (optional)
+ - Fake Localizations in SDK (Useful for non-translated questionmarks)
+ - Show Modinfo in About menu
+ - Some (mostly useless for you) trigger wizards
+ - Improved/workarounded bugged quest menu. Use "EDIT LOCKED!" to lock and unlock editing of quests
+ - Dump Level Info as an option
+ - Fixes some (crashing/annoying) bugs
+
+By AyCe

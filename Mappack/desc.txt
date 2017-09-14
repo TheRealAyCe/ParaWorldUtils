@@ -1,0 +1,20 @@
+Version v5.0 (19th March 2015)
+
+100 usermaps!
+
+=====================
+IMPORTANT
+=====================
+IF YOU GOT A PREVIOUS VERSION (pre 4.0) OF THE MAPPACK, MAKE SURE TO RUN
+PWCleaner.exe UTILITY IN ORDER TO DELETE PREVIOUS AND NOW UNUSED MAPS!!!
+=====================
+
+This is the official inofficial community mappack for Paraworld!
+
+It contains all working maps made by the community.
+
+Each map got more or less fixed and SEAS enabled on them (CEP/Mirage).
+
+If you encounter any bugs, feel free to report them in the forum. It helps!
+
+Enjoy Paraworld! :D

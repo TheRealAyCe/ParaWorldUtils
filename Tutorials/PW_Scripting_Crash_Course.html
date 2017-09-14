@@ -1,0 +1,622 @@
+<title>Adder's Paraworld Scripting Crash Course</title>
+<h1>Adder's Paraworld Scripting Crash Course</h1>
+
+<h2>From newbie to scripting wizard in 24 minutes.</h2>
+
+<h3>(c)2011 Peter Schäfer&lt;peter.schaefer@gmail.com&gt;. Unauthorized reproduction is forbidden.</h3>
+
+<h2>How to use this guide</h2>
+This guide introduces basic concepts of programming languages, but will also mention advanced concepts very early on.
+It is suggested that you read over stuff that you do not understand and come back to it later when it will be explained with an example.
+
+<h2>Lesson 1: Comments and blocks</h2>
+Comments in source code are placed everywhere where something is done that needs explaining, or where a block of code begins that serves a complicated purpose.
+They can also be used to turn unneeded code inactive.
+There are two types of comments: Single line comments, which turn everything after the // into a comment: <pre><code>x=1;//Set x to one.</code></pre>
+And multiline comments, which can span more than one line, and which can be used to comment out several lines of code.
+<pre><code>/*
+ Smart code follows here.
+*/
+/* Old code:
+iCounter=1;
+*/
+</code>
+</pre>
+Instead of adding a comment to a block of complicated code, you can group code like this:
+<pre>
+<code>begin SomeNameForThisBlock;
+..
+end SomeNameForThisBlock;
+</code>
+</pre>
+or like this:
+<pre><code>begin;
+..
+end;
+</pre></code>
+In addition such a block is relevant for the "scope" of a variable, which will be explained later.
+
+<h2>Lesson 2: Variables and data types</h2>
+Variables have names.
+The variable name is a way to find a "box" with content. The content can vary.
+In ParaWorld universal scripting language, the box has to contain content
+of a certain predetermined data type.
+<p>
+The most well-known data types are:
+<br>Strings(named "<b>string</b>" in usl), which contain text like "Hello, world!".
+<br>Integer(named "<b>int</b>" in usl), like 0,1,-1,2,-2,..
+<br>Floating point real numbers(named "<b>real</b>" in usl), like 0.0(yes that is different from 0), 0.5, -0.5 ..
+<br>Boolean variables(named "<b>bool</b>" in usl), which can either be "true" or "false".
+<br>Bitset variables(named "<b>bitset</b>" in usl), which contain several boolean variables compressed into an integer number.
+<br>Array(named "<b>array</b>" in usl), which are a list of variables of the same data type.
+<br>Object variables(named "<b>C...</b>" in usl), which contain instances of classes(more about that later).
+<br>Pointers(named "<b>^</b>" in usl), which, you guessed it, point to variables.
+<br>Object Handles(named "<b>CObjHndl</b>" in usl), which are pointers wrapped in an Object, and have an IsValid function(more about that later)
+<br>The empty data type(named "<b>void</b>" in usl), which is really a way to say that a function is a procedure.
+<br>References(named "<b>ref</b>" in usl), which are like pointers, only better, but are not really a data type.
+<br>Procedure References(named "<b>procref</b>" in usl), which are a way to use functions and procedures as variables(more about that later).
+<br>Points(2D)(named "<b>point</b>" in usl), which is a position in a plane. Points are like vectors, but only have X and Y.
+<br>Rectangles(2D)(named "<b>rect</b>" in usl), which contain left,top,right,bottom of a rectangle.
+<br>Vector(named "<b>vec3</b>" in usl), which is a position in a three dimensional coordinate system.
+<br>Quaternion(named "<b>Quat</b>" in usl), which usually represents a rotation around an axis in 3D space.
+<p>
+In addition, there are rules for the name of the variable, which
+has to follow "hungarian notation", otherwise the usl compiler will not run the code.<br>
+The variable name is prefixed with: "s" for string, "i" for int, "f" for real, "b" for bool, "dw" for bitset, "a" for array, "x" for object, "p" for a pointer, "x" (again) for an object handle, "x" (again) for a procedure reference, "x" (again) for a point, "v" for a 3D-vector, "q" for a quaternion.
+These can be combined where necessary. For example, apxEffect is an array of pointers to objects(or a mixed type).
+<br>
+In addition, the variable name is prefixed with "m_" for class member variables(more about that later),
+"ms_" for static class member variables
+(more about that later) and with "p_" for function parameters. For example, p_paiLocIdx is a parameter that is a pointer to an array of integers.
+<p>
+The "var" keyword is used to declare a variable, the "const" keyword is used to declare a constant, which is like a variable that doesn't change. Constants are named in capital letters, and do not require a hungarion notation prefix.
+<h3>Examples</h3>
+<pre><code>var int iStep, iStep2;
+iStep= 2; //put something into the variable
+iStep= 3; //put something different into the variable
+iStep2= iStep; //put the stuff that is in iStep into jStep as well
+</code></pre>
+
+<h2>Lesson 3: Pointers, References, Pass by Reference, Object Handles and Classes</h2>
+
+A pointer is a way to use something small to refer to something big, or is unique.
+Often the big thing should only be there once, but you can have more than one pointer pointing to it.
+In addition, if you have several objects, you can use the pointer to remember which of the objects is important for something that happens later.
+<pre><code>var ^CObject m_pxObj;
+proc void RememberMe(^CObject p_pxObj)
+	m_pxObj= p_pxObj;
+endproc;
+</code></pre>
+
+An object handle is a special kind of "class" that wraps a pointer, and adds an extra function that checks whether the pointer is still valid(points to an object that has not been destroyed in the meantime). Object handles are used like this:
+<pre><code>var CObjHndl m_pxObj;
+proc void RememberMe(^CObject p_pxObj)
+	m_pxObj= p_pxObj;
+endproc;
+proc void UseMe()
+	if(m_pxObj.IsValid())then
+		var ^CObject pxObj= m_pxObj.GetObj();
+		pxObj^.DoSomething();
+	endif;
+endproc;
+</code></pre>Replace CObject by any class name and you can wrap the object in an object handle.
+
+
+<p>
+A class is a blueprint for an object. One also says that an object is an "instance" of the class.
+The following creates a pointer to a class variable, and fills it with a pointer to a new instance of the class CProgressBar:
+<pre><code>var ^CProgressBar pxProgress = new CProgressBar();
+</code></pre>
+
+A class is declared by using the "class" keyword, followed by the name of the class, usually followed by the "inherit" keyword, and then followed by the name of the "parent class".
+The "inherit" keyword and the parent class indicate what kind of class the new class is, and the new class will inherit methods and member variables from parent class.
+A "method" of the class is a member procedure of a class (a procedure is a sequence of statements).
+
+<pre><code>class CRememberer inherit CObject
+	var ^CObject m_pxObj;
+	export proc void RememberMe(^CObject p_pxObj)
+		m_pxObj= p_pxObj;
+	endproc;
+	export proc ^CObject Recall()
+		return m_pxObj;
+	endproc;
+endclass;
+</code></pre>
+
+As you can see above, in USL a function is a procedure that returns a value using the "return" keyword.
+The return value type is written between the "proc" keyword and the procedure name. If you use the "void" keyword, it indicates that the procedure is just that and does not return a value.
+While I'm not 100% sure about the full meaning of the "export" keyword, it indicates that the variable or procedure can be called from outside the class(it makes it "public"), while the lack of this keyword indicates a "protected" member that is only accessible to child classes.
+For example, in CRememberer, m_pxObj is private, fortunately though it is handed out by the public "Recall" method.
+
+<h3>Pass by reference</h3>
+The &amp; operator in a procedure declaration means that when the parameter is changed,  the changes will also affect the varaiable that has been passed in as an argument.
+This can be used to return multiple values and thus overcome the shortcomings of the return statement, which can only return one value at a time.
+In the auto-generated documentation to ParaWorld, the &amp; might be missing, so that your only indicator that a parameter is passed by reference is the "p_k"-prefix.
+<pre><code>class CRememberTwoValues inherit CObject
+	var vec3 m_vVec1,m_vVec2;
+	export proc void RememberValue(vec3 p_pvVec1,vec3 p_pvVec2)
+		m_vVec1= p_pvVec1;
+		m_vVec2= p_pvVec2;
+	endproc;
+	export proc void Recall(vec3& p_krvVec2, vec3& p_krvVec2)
+		p_krvVec1= m_vVec1;
+		p_krvVec2= m_vVec2;
+	endproc;
+endclass;
+</code></pre>
+
+<p>
+<h3>Using inheritance</h3>
+We take a very basic example from Vehicle.usl
+
+<pre><code>class CWehrspinne inherit CVehicle
+
+	export constructor()
+	endconstructor;
+
+	proc void OnInit(bool p_bLoad)
+		super.OnInit(p_bLoad);
+
+		if(!p_bLoad)then
+			SetBuildUp(CBuildUpBase.TYPE_WEAPON);
+			var ^CGameObj pxO = CSrvWrap.GetObjMgr()^.CreateObj("seas_wehrspinne_top", GetOwner());
+			if(pxO!=null)then
+				GetBuildUp()^.AddObj(pxO^.GetHandle(), "we");
+			endif;
+			cast&lt;CBuildUpWeapon&gt;(GetBuildUp())^.SetCanRotate(true);
+			cast&lt;CBuildUpWeapon&gt;(GetBuildUp())^.SetCanSwitchAttackMode(true);
+		endif;
+
+	endproc;
+
+...
+
+endclass;
+</code></pre>
+
+We can observe five things here:<br>
+The spider has a special procedure called a constructor, which uses the "constructor" keyword and has no return type.
+Since the constructor of CVehicle is private, it cannot be constructed in the usual way(with <code>new CVehicle()</code>), but the spider has it's own constructor that has been made public using the "export" keyword.
+By convention, objects in the game (probably all CGameObj) that need a start sequence have an OnInit procedure.
+Here, the "super" keyword is being used to indicate that we want to call a method of the parent class. This means, super.OnInit(..) will actually process the statements that are in CVehicle.OnInit(..).
+In many situations, it is a good idea to call the parents method to do the basic stuff.
+Finally, there are calls to procedures that are nowhere in the code for the CWehrspinne class, like SetBuildUp(..) and GetBuildUp(). These come from the parent class, or in this case, even from the parent of the parent class(which is CTransportObj). The getOwner() method seems to come even from further up in the inheritance tree, probably from CGameObj.
+
+
+
+<h2>Lesson 4: Control structures and Indentation</h2>
+
+Programming would be a very tedious taks if you had to compose a list of all things that need to be done one by one.
+Fortunately, there are constructs called control structures which allow you to do a list of statements several times, once, or not at all.
+<p>
+The first is the if-then-else-endif control structure:
+<pre><code>if(CanAttack())then
+	Attack();
+else
+	RunAway();
+endif;
+</code></pre>
+CanAttack() is a function returning a boolean, either "true" or "false". If true, Attack() is done, if false RunAway() is done.
+Notice how the block containing Attack() and the block containing RunAway() are indented by a tab. It is extremely good practice to indent blocks, even simple ones like the aforementioned begin..end;-block.
+Unindented code would be very hard to read.
+
+There is a negation operator "!" which turn a true into a false and false into true; this will do the same as above:
+<pre><code>if(!CanAttack())then
+	RunAway();
+else
+	Attack();
+endif;
+</code></pre>
+
+You can build conditions using "==" to compare for equality, and its opposite "!=" to compare for inequality.
+You can combine conditions by using "&&" (logical and) and "||" (logical or). You can build more complicated if-then-else-endif statements by using "elseif".
+<pre><code>if(CanAttack() && SeeEnemy()!=null)then
+	Attack(SeeEnemy());
+elseif(IsBeingHit() || IsNervous())
+	RunAway();
+else
+	DoNothing();
+endif;
+</code></pre>
+The logical operators will not call the second function when it isn't necessary:<br>
+if CanAttack() is false, SeeEnemy will not be called.<br>
+if IsBeingHit() is true, IsNervous() will not be called.<br>
+This is important if the second conditions is illegal under some circumstances, like a null pointer access, or if the function called has side effects.
+<p>
+Now to something different: the for-loop. The purpose of the for-loop is to repeat the statements in its inner block, and usually to change a counter variable while doing so. USL has one of the more creative for-loops syntaxes I know, it goes like this:
+<pre><code>			var int i;
+			var int iC = pxInv^.Count();
+			for(i=0) cond(i&lt;iC) iter(++i) do
+				....
+			endfor;
+</code></pre>
+The first pair of brackets contains an initialisation assignment, the brackets after "cond" contain the condition that has to be true to continue the loop, and iter(++i) is the statement to execute at the end of the loop.
+So this:
+<pre><code>			var int i;
+			for(i=0) cond(i&lt;3) iter(++i) do
+				DoNothing();
+			endfor;
+</code></pre>
+Is the same as:
+<pre><code>			var int i;
+			i=0;
+			i&lt;3;
+			DoNothing();
+			++i;
+			i&lt;3;
+			DoNothing();
+			++i;
+			i&lt;3;
+			DoNothing();
+			++i;
+			i&lt;3;
+</code></pre>
+If you wonder what ++i and --i do: ++i adds 1 to i, and --i subtracts 1 from i.
+<p>
+Now to something that does almost the same as an if-then-elseif-elseif-elseif-elseif-endif control structure:<br>
+The "switch" control structure:
+<pre><code>	proc vec3 GetMovement( int p_iDir, real p_fStep )
+		var vec3 vResult;
+		switch(p_iDir)
+			case(0)do vResult.SetXYZ( -p_fStep, -p_fStep, 0.0 ); endcase;
+			case(1)do vResult.SetXYZ(  0.0, -p_fStep, 0.0 ); endcase;
+			case(2)do vResult.SetXYZ(  p_fStep, -p_fStep, 0.0 ); endcase;
+			case(3)do vResult.SetXYZ(  p_fStep,  0.0, 0.0 ); endcase;
+			case(4)do vResult.SetXYZ(  p_fStep,  p_fStep, 0.0 ); endcase;
+			case(5)do vResult.SetXYZ(  0.0,  p_fStep, 0.0 ); endcase;
+			case(6)do vResult.SetXYZ( -p_fStep,  p_fStep, 0.0 ); endcase;
+			case(7)do vResult.SetXYZ( -p_fStep,  0.0, 0.0 ); endcase;
+			case default do vResult.SetXYZ( 0.0, 0.0, 0.0 );endcase;
+		endswitch;
+		return vResult;
+	endproc;
+</code></pre>
+This classic procedure takes a movement direction code between 0 and 7 (inclusive) and returns a different 3-dimensional vector depending on the direction p_iDir.
+The directions work like this:
+<pre><code>012
+7_3
+654</code></pre>
+The switch does the same as this if-then-elseif-elseif-elseif-elseif-endif control structure:
+<pre><code>	proc vec3 GetMovement( int p_iDir, real p_fStep )
+		var vec3 vResult;
+		if(p_iDir==0)then
+			vResult.SetXYZ( -p_fStep, -p_fStep, 0.0 );
+		elseif(p_iDir==1)then
+			vResult.SetXYZ( 0.0, -p_fStep, 0.0 );
+		elseif(p_iDir==2)then
+			...
+		elseif(p_iDir==3)then
+			...
+		elseif(p_iDir==4)then
+			...
+		elseif(p_iDir==5)then
+			...
+		elseif(p_iDir==6)then
+			...
+		elseif(p_iDir==7)then
+			...
+		else
+			vResult.SetXYZ( 0.0, 0.0, 0.0 );
+		endif;
+		return vResult;
+	endproc;
+</code></pre>
+<p>
+Next, there is a control structure that is more simple than the for-loop: The while-loop:
+<pre><code>var int i;
+i=0;
+while(i&lt;3)do
+	DoNothing();
+	++i;
+endwhile;
+</code></pre>
+This will do the same as the example for the for-loop that we discussed before.
+
+Then there is the repeat-until-loop:
+<pre><code>var int i;
+i=0;
+repeat
+	DoNothing();
+	++i;
+until(!(i&lt;3))endrepeat;
+</code></pre>
+
+Again, this will do the same as the example for the for-loop that we discussed before.
+There is however one difference: Even if we would start with i=3; the inner block of the loop will be executed at least once:
+<p>
+In general, the repeat-until-loop does the same as this code that uses a while loop:
+<pre><code>
+Init();
+DoSomething();
+Iter();
+while(Cond())do
+	DoSomething();
+	Iter();
+endwhile;
+</code></pre>
+
+<h2>Lesson 5: Variable scope, pointers, references and the "static" keyword</h2>
+The following code will raise an USL error:
+<pre><code>begin A;
+	var int iI=1;
+	begin B;
+	    var int iJ= iI+1;
+	end B;
+	iI=iJ+1;//error
+end A;
+</pre></code>
+The reason for the error is that iJ has been declared inside the scope of block B and is unknown in the outside block B.
+It is likely that the memory room that iJ takes up will be garbage collected by the USL virtual machine once the scope containing it is closed.
+However, if the variable is returned by reference, it probably isn't garbage collected until all references loose scope.
+Like this:
+<pre><code>proc ref int GetInt()
+	var int iI=1;
+	return iI;
+endproc;
+</pre></code>
+Technically, a reference is often implemented as a smart pointer that increments an internal counter for every time the object is referenced, and releases its memory only when the counter reaches zero when decreased.
+In addition you don't need to use a ^ to access a reference, but you need that to access a pointer:
+<pre><code>proc ref int GetInt()
+	var int iI=1;
+	return iI;
+endproc;
+proc ^int GetIntPtr()
+	var int iI=1;
+	return ^iI;
+endproc;
+proc void Example()
+	var int iI;
+	iI= GetIntPtr()^;
+	iI= GetInt();
+endproc;
+</pre></code>
+Pointers suck in comparision to references because often code is written where it is unclear which class has to destroy the object that the pointer points to. This leads to memory leaks.
+<p>
+<h3>The "this" keyword and type casts</h3>
+The "this" keyword is used to get the pointer value that points to the current object. It is often used when a pointer needs to be passed in to a function.
+<pre><code>var ^CFightingObj pxFighter= this;
+DoSomething(this);
+</pre></code>
+
+Pointer type casts are used to convert a pointer to an object xA of class A to a pointer to an object of class B.
+This is only possible if xA is an object of class B, or a derived class(i.e. xB is a parent of xA). If the pointer conversion is not possible, the type cast returns a null pointer.
+This can be used to check whether an object is of class B.
+<pre><code>var ^CFightingObj pxFighter=cast&lt;CFightingObj&gt;(this);
+if(pxFighter!=null)then
+	pxFighter^.DoSomethingThatOnlyAFightingObjCanDo();
+endif;
+</pre></code>
+
+
+<h3>The "static" keyword</h3>
+The "static" keyword can turn up in a variable declaration or in a procedure declaration.
+In general, static procedures can only call static procedures and use static member variables of their class.
+<pre><code>class CRememberOne inherit CObject
+	var static ^CObject ms_pxObj;
+	export static proc void RememberMe(^CObject p_pxObj)
+		ms_pxObj= p_pxObj;
+	endproc;
+	export static proc ^CObject Recall()
+		return ms_pxObj;
+	endproc;
+endclass;
+</code></pre>
+
+You don't need an instance of the CRememberOne class to use its static methods and members. This is why static member variables can also be called class variables.
+One the other hand, you have a problem if you ever come into the situation where you want to remember more than one thing, because you cannot create a different CRememberOne class.
+
+<h2>Lesson 6: Using data types, the Random class and the Math library</h2>
+<h3>Strings</h3>
+Strings represent text.
+<pre><code>sText.MakeLower();//modify string into lower case letters
+sText.MakeUpper();//modify string into upper case letters
+sText.Delete(iFrom,iCount);//modify string by removing iCount letters starting from iFrom
+sText.Replace("_m_","_");//modify string by replacing the left string by the right string
+iI= "abc_de".Find("_");//position of a substring in  a string, counting from zero, or -1
+sText2= sText.Left(3);//the 3 letters on the left side of the string
+sText2= sText.Right(3);//the 3 letters on the right side of the string
+sText3= sText+" "+sText2;//concatenate three strings
+iLength= sText.GetLength();//get the length of the string
+iI= "100".ToInt();//convert to int
+fF= "100.0".ToReal();//convert to a floating point real number
+sText= iI.ToString();//convert an integer to a text. ToString() works for many other data types as well.
+sText= sText.TrimLeft().TrimRight();//remove spaces left and right
+bEmpty=sText.IsEmpty();//whether the string is the empty string
+</pre></code>
+
+<h3>Integers</h3>
+Integers are your stock numbers: 0,1,-1,2,-2,...  I'll only list their more non-obvious functions here.
+<pre><code>iI= iI%iM;//iI modulo iM; that is, the remainder when dividing iI by iM to an integer number.
+</pre></code>
+
+<h3>Arrays</h3>
+Arrays are a list of things of the same data type.
+<pre><code>var array int aiArray;//declare an array of integers
+aiArray = 0;//initialize to the empty array
+aiArray = 2;//initialize to array of size two
+iI= aiArray.NumEntries();//get the number of elements in the array
+aiArray.DeleteEntry(0);//delete the first entry and renumber the others
+aiArray.DeleteEntry(aiArray.NumEntries()-1);//delete the last entry
+aiArray.AddEntry(123);//insert 123 at the end of the array
+</pre></code>
+
+<h3>Bit sets</h3>
+Bit sets are arrays of boolean values squashed into an a double word(that is, a 32 bit integer) for efficiency and ease of use.
+<pre><code>iI.ToBitset();//convert an integer into a bitset
+dwC= dwA&amp;dwB;//"&" is means "and" - the bit has to be set in both dwA and dwB to be set in dwC.
+dwC= dwA|dwB;//"|" is means "or" - the bit has to be set either in dwA and dwB to be set in dwC.
+dwC= &amp;0FFh;//set the 16 lowest(first) bits by using hexadecimal: F==15==8+4+2+1
+dwc= 01d;//set just the lowest bit so that the double word representation of the bitset is 1
+dwC= dwB&lt;&lt;8|dwA&0FFh;//multiplex two bitsets by shifting the 8 lowest bits of dwB 8 places higher and setting the 8 lowest bits to the 8 lowest bits of dwA
+dwB= dwC&gt;&gt;8;//de-multiplex the upper part of the bitset
+dwA= dwC&amp;0FFh;//de-multiplex the lower part of the bitset
+dwC= ~dwA;//invert the bits; i.e. turn 0 into 1 and 1 into 0.
+dwC= dwA&amp;~dwB;//dwA without dwB - unset the bits in the value of dwA that are set in dwB
+</pre></code>
+
+<h3>The Math library</h3>
+The mathematics libary provides nice functions that return a value.
+<pre><code>fF=Math.Abs(fG);//absolute value of fG; that is -fG if fG is negative, fG otherwise.
+fF=Math.Max(1.0,fX);//the maximum(greater) value; I don't know whether it works for more than two numbers.
+fF=Math.Min(1.0,fX);//the minimum(lesser) value; I don't know whether it works for more than two numbers.
+fF=Math.Clamp(fF,fA,fB);//return a number between fA and fB, or fF when it is in between
+fF=Math.Pow(2.0,1.5);//2.0 to the power of 1.5(that is the square root of the cube of 1.5)
+fF=Math.Log(100.0);//The logarithm either to base "e" or base 10. Too lazy to check which it is.
+//You see why in the next line, which shows how to use any base.
+fF=Math.Log(fA)/Math.Log(fB);//The logarithm to base fB of fA. E.g. Math.Log(8.0)/Math.Log(2.0)==3.0
+fPi=Math.Pi();//3.141592..
+fCos=Math.Cos(fAngle);//The Cosine(x part) of the angle(in terms of 2 pi i.e. 2 pi=360°)
+fSin=Math.Sin(fAngle);//The Sine(y part) of the angle(in terms of 2 pi i.e. 2 pi=360°)
+fArc=Math.ATan2(fX,fY);//A function that does the opposite of cos/sine: get an angle from the x and y of a vector.
+fInt=Math.Floor(fF);//the integer part of fF i.e. always rounded "down" towards zero
+fInt=Math.Ceil(fF);//the integer part of fF+0.999999999 i.e. always rounded "up" away from zero
+fMod=Math.FMod(fF,fM);//fF modulo fM; that is, the remainder when dividing fF by fM to an integer number.
+</pre></code>
+
+<h3>The Random class</h3>
+This provides deterministic pseudo-random numbers.
+<pre><code>Random.Seed();//start the PRNG. You probably don't need to do this.
+iI=Random.GetInt();//return a potentially huge random number
+iI=iA+Random.GetInt()%(iB-iA);//return a random integer number between iA and iB(excluding iB). iB&gt;iA.
+</pre></code>
+
+
+<h2>Lesson 7: Vectors and Quaternions</h2>
+The vectors(the vec3 data type)represent position or directions in three-dimensional space. They have an x,y and z value.
+Vectors can be added, subtracted and multiplied by a scalar(i.e. a floating point real number) just like numbers. There are setters and getters for the x,y, and z values:
+<pre><code>vDiff.SetX(0.0);
+real fZ= vDiff.GetX();
+vDiff.SetXYZ( -1.0f, -1.0f, -1.0f );
+</pre></code>
+
+<p>
+Matrixes can be used to rotate vectors. As far as I know, there is no "matrix" data type used in ParaWorld. This is because quaternions are being used. Quaternions are cool because they can be chained efficiently. This follows from their properties, which are described in the following. Skip over the next section if you don't like mathematics.
+<p>
+Quaternions(the Quat data type)are useful to represent rotations around an axis in three-dimensional space. They have four values. They are often written in the form:
+a1 + bi + cj + dk<br>
+When multiplying them(a1 + bi + cj + dk)*(e1 + fi + gj + hk), the following rules are applied to simplify the result:<br>
+i<sup>2</sup> = j<sup>2</sup> = k<sup>2</sup> = ijk = -1<br>
+This means that, for z= (a1 + bi + cj + dk) with |z|= a<sup>2</sup>+b<sup>2</sup>+c<sup>2</sup>+d<sup>2</sup>= 1:<br>
+(a1 - bi - cj - dk)*(a1 + bi + cj + dk)=1<br>
+You might want to remember that the following quaternion product is used to rotate the vector (x,y,z) around an axis, assuming a<sup>2</sup>+b<sup>2</sup>+c<sup>2</sup>+d<sup>2</sup>= 1:<br>
+(a1 - bi - cj - dk)*(xi + yj + zk)*(a1 + bi + cj + dk)<br>
+<h3>Quaternions in USL</h3>
+You don't need to know all this, because USL does most of it for you. In USL, quaternions are used like this:
+<pre><code>var Quat qRot;
+qRot.FromVec3(vDir);
+SetRot(qRot);
+</pre></code>
+The above code will make the object that contains this code look in the direction the vector vDir points to. Quaternions can be divided, which is like calculating the difference in terms of rotation:
+<pre><code>var Quat qRotDiff=qRot/GetRot();</pre></code>
+The above code calculates the remaining rotation needed for an object to change its facing from GetRot() to qRot.
+<pre><code>qRot.RotateZ(Math.Pi());
+pxDocker^.RotateAction(qRot);
+</pre></code>
+The above code will modify the quaternion qRot by adding an additional rotation around the z-axis by 180 degrees.
+
+<h2>Lesson 8: Debugging your code</h2>
+This method of debugging uses "print" statements to create debug output. Just place a "print" before any statement to see when your code is active and whether your code is active at all. You can also output the value of variables.
+
+<pre><code>//This should work in many places in Scripts/Server/*.usl
+CFeedback.Print(CFeedback.ALL, CFeedback.DEBUG, "We are here");//send debug output to all players
+
+//When your code is inside a CGameObj, for example in a class in Vehicle.usl:
+CFeedback.Print(GetOwner(), CFeedback.ATTACK, "We are here, now", GetPos());//send debug output to the owner+ping+noise
+
+//In AI code, send to one player:
+m_pxSensor^.SendChatMsg("I'm here", 7500, {0.0, 0.0, 0.0},1);//send to player 1
+
+//In AI code, send to all players:
+begin;
+	var int i, iC=m_pxSensor^.GetNumPlayers();
+	if(iC>0)then
+		var int iTimeOut=7500;
+		var vec3 vPos = {0.0, 0.0, 0.0};
+	 	for(i=0)cond(i&lt;iC)iter(i++)do
+	 		m_pxSensor^.SendChatMsg("I'm here", iTimeOut, vPos,i);
+	 	endfor;
+	endif;
+end;
+
+//This might work, but I don't know where the log is ..
+CGameWrap.LogDebug("topic","message");
+
+//This might work, but I don't know where the log is ..
+KLog.LogWarn("AI","Village wall placement has been started!");
+
+//This checks whether a is 0 and throws an error if this is not the case
+System.Assert(a==0);
+</pre></code>
+
+
+<h2>Appendix 1 in German: Binärzahlen und Bitsets</h2>
+
+<h3>Binärzahlen</h3>
+
+<p>
+Im klassischen Dezimalsystem werden die Zahlen als Folge von 1ern 10nern 100ern und so weiter dargestellt. Jede Stelle weiter links hat die 10-fache Wertigkeit der niederwertigeren Stelle.
+<p>
+<p>
+Im Binärsystem werden die Zahlen als Folge von 1ern, 2ern, 4ern, 8er, 16ern usw., dargestellt. Jede Stelle weiter links hat die 2-fache Wertigkeit der niederwertigeren Stelle.
+<p>
+
+
+
+Beispiel:
+<p>
+6 im 10ersystem ist gleich 4+2. Im Binärsystem wird diese Zahl  also als 110 dargestellt = 0x1+1x2+1x4.
+</p>
+<p>
+19 im 10ersystem ist gleich 16+2+1. Im Binärsystem wird diese Zahl  also als 10011 dargestellt = 1x1+1x2+0x4+0x8+1x16.
+</p>
+<p>
+Für die Arbeit mit Binärzahlen bietet USL neben den üblichen arithmetischen Operationen die Binäroperationen & | &lt;&lt; &gt;&gt; sowie ~ und ^ an.
+</p>
+<p>
+Binäres und: a&b ergibt die Folge von Binärziffern, in der die Bits(0 oder 1) gesetzt sind, die in a und auch in b gesetzt sind. Beispiel: 6&19= 2 oder binär: 10011&110 = 10
+</p>
+<p>
+Binäres oder: a|b ergibt die Folge von Binärziffern, in der die Bits(0 oder 1) gesetzt sind, die in a oder in b gesetzt sind. Beispiel: 6|19= 23 oder binär: 10011&110 =10111
+</p>
+<p>
+Leftshift(Multiplikation mit einer Zweierpotenz): a&lt;&lt;i ergibt die Folge von Binärziffern wie in a, nur dass i mal eine 0 dahinter gesetzt wird: 19&lt;&lt;3= 10011&lt;&lt;3= 10011000 =19*8=154
+</p>
+<p>
+Rightshift(Division mit einer Zweierpotenz): a&gt;&gt;i ergibt die Folge von Binärziffern wie in a, nur dass i mal die letzte Ziffer gestrichen wird: 19&gt;&gt;3= 10011&gt;&gt;3= 10=19/8=2 (es wird abgerundet)
+</p>
+<p>
+Negation: ~a ergibt die Folge von Binärziffern wie in a, nur dass 0 durch 1 und 1 durch 0 ersetzt wird. Beispiel:  ~19=~10011= …01100= (kommt darauf an ob es eine 16 Bit oder 32 Bit Binärzahl war)
+</p>
+<p>
+Entweder-oder: XOR: a^b ergibt die Folge von Binärziffern, in der das jeweilige Bit gesetzt ist wenn die sich entsprechenden Bits in a und b verschieden sind; das ist so ähnlich wie die Zahlen zu addieren ohne Übertrag. Bsp: 6^19= 21 oder binär: 10011^110 = 10101
+</p>
+
+
+<h3>Bitsets</h3>
+
+<p>
+Bitsets repräsentieren Mengen durch einzelne Bits, wobei ein Bit gesetzt ist, wenn x Teil der Menge ist.
+</p>
+<p>
+Eine Zahl kann auf diese Weise eine Menge von Eigenschaften repräsentieren, allerdings beschränkt durch die verfügbare Zahlengröße in Bits d.h. üblicherweise 31 oder 32 Bit.
+</p>
+<p>
+Der Trick dabei ist seine Konstanten nicht als 1,2,3,4,5.. zu definieren, sondern als Zweierpotenzen: 1,2,4,8,16,..
+Diese können dann ohne Vermischung addiert werden oder genauer mit dem binären Oder und Und verknüpft werden.
+</p>
+<p>
+Der binäre Und Operator kann dann verwendet werden, um eine Schnittmenge zu bilden.
+</p>
+<p>
+Der binäre Oder Operator kann dann verwendet werden, um eine Vereinigungsmenge zu bilden.
+</p>
+
+
+
+<h2>Finally</h2>
+Finally, I did NOT test all code in this guide. If you find errors, you can tell peter.schaefer@gmail.com
+Also, I was lazy and did not find all methods for data types, especially a lot of those that apply to the vec3 and Quat data types.
+If you have a question, ask it, I will include the answer in later versions of the guide.
+
+<p>
+Version of 16.04.2012 21:07

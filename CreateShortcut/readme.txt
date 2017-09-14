@@ -1,0 +1,1 @@
+This tool will create a shortcut to the boosterpack on the desktop.

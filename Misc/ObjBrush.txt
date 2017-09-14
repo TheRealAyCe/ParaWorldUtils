@@ -1,0 +1,12 @@
+ObjBrush:
+Colour = Underground
+Selected Area = Area which will be leveled
+Colours:
+#000000 (0) Grass
+#0000FF (1) Sea
+#00FF00 (2) Meadow
+#00FFFF (3) Forest
+#FF0000 (4) Rock (Unpassable!)
+#FF00FF (5) Road
+#FFFF00 (6) Beach/Mud
+#FFFFFF (7) Ice, Lava, etc. (Unpassable!)

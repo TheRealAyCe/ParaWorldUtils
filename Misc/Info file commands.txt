@@ -1,0 +1,11 @@
+replacedirscan
+joindirscan
+forcefilereplace
+tryfilereplace
+priority
+replaces
+excludes
+requires
+type
+info
+version id
